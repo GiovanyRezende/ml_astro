@@ -50,7 +50,7 @@ for column in data.description:
   else:
     colunas = colunas + [column[0]]
 ```
-Esse código será terá seu objetivo cumprido mais para frente. Posteriormente, se realiza a consulta SQL e faz seu armazenamento em uma variável:
+Esse código terá seu objetivo cumprido mais para frente. Posteriormente, se realiza a consulta SQL e faz seu armazenamento em uma variável:
 ```
 cursor.execute('''SELECT
                massa_kg,
