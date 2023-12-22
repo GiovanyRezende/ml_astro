@@ -184,7 +184,7 @@ TOI-2524 b      1.0      0.0           0.0       0.0        0.0
 NGTS-9          0.0      1.0           0.0       0.0        0.0
 TOI-2524        0.0      1.0           0.0       0.0        0.0 
 ```
-Mesmo com 90% de acurácia, o modelo conseguiu acertar com 100% de rendimento as classes dos objetos, ainda seja uma tabela de probabilidades. No entanto, isso não é quer dizer que o modelo sempre irá acertar, por exemplo, é possível o modelo eventualmente confundir um satélite com um asteroide, visto que o ML usou apenas dados físicos e não orbitais.
+Mesmo com 90% de acurácia, o modelo conseguiu acertar com 100% de rendimento as classes dos objetos, ainda seja uma tabela de probabilidades. No entanto, isso não quer dizer que o modelo sempre irá acertar. Por exemplo, é possível o modelo eventualmente confundir um satélite com um asteroide, visto que o ML usou apenas dados físicos e não orbitais.
 
 # Cadastrar dados aprovados pelo modelo
 Se quisermos incrementar o banco com dados aprovados pelo modelo, podemos finalizar o projeto com o seguinte cadastro:
