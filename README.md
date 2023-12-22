@@ -114,10 +114,10 @@ for x in range(0,11):
     break
 ```
 Não só a acurácia é medida, como também precisão, sensibilidade (recall) e o F1-score. As definições de cada pontuação são:
--**Acurácia**: é a razão entre as instâncias verdadeiras e todas as instâncias;
--**Precisão**: é a razão entre as instâncias verdadeiramente positivas e todas as instâncias ditas como positivas;
--**Sensibilidade**: é a razão entre os verdadeiros positivos e a soma dos verdadeiros positivos com os falsos negativos;
--**F1-score**: é uma média harmônica da Precisão e da Sensibilidade.
+- **Acurácia**: é a razão entre as instâncias verdadeiras e todas as instâncias;
+- **Precisão**: é a razão entre as instâncias verdadeiramente positivas e todas as instâncias ditas como positivas;
+- **Sensibilidade**: é a razão entre os verdadeiros positivos e a soma dos verdadeiros positivos com os falsos negativos;
+- **F1-score**: é uma média harmônica da Precisão e da Sensibilidade.
 
 Extraindo esses valores e a matriz confusão, temos o seguinte resultado:
 ```
@@ -141,9 +141,9 @@ Matriz de Confusão:
  [0 0 0 2 1]
  [0 0 0 0 1]] 
 ```
-A matriz de confusão mostra o quanto os dados de teste foram classificados corretamente. Se considerarmos a primeira linha, podemos ver que 3 instâncias forma classificadas corretamente como planetas e nenhuma instância foi classificada errada. Resumindo o seu funcionamento, podemos concluir que houve maior confusão do modelo com a classificação de satélites, havendo uma instância classificada errada como asteroide.
+A matriz de confusão mostra o quanto os dados de teste foram classificados corretamente. Se considerarmos a primeira linha, podemos ver que 3 instâncias foram classificadas corretamente como planetas e nenhuma instância foi classificada errada. Resumindo o seu funcionamento, podemos concluir que houve maior confusão do modelo com a classificação de satélites, havendo uma instância classificada errada como asteroide.
 
-##Classificando exoplanetas e estrelas
+## Classificando exoplanetas e estrelas
 Foram escolhidos quatro exoplanetas e duas estrelas para classificação. A criação de um novo dataframe com dados dos exoplanetas e estrelas permite o processo:
 ```
 nomes_exo = ["NGTS-9 b", "HD 86226 c", "TOI-2373 b", "TOI-2524 b", "NGTS-9", "TOI-2524"]
