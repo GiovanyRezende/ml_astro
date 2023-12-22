@@ -8,7 +8,7 @@
 *Os dados são os cadastros no [banco de dados db_astro](https://github.com/GiovanyRezende/sql_db_com_python).* **Por ter sido necessário, houve o cadastro de mais uma informação em tb_galaxia, por isso, o arquivo do banco SQL utilizado para o algoritmo se chama db_astro(inicio) e db_astro é o banco final e atualizado.**
 
 # Os dados de treino
-*Os dados utilizados para treino e classificação são os dados de ```tb_corpo_celeste```, com exceção das colunas ```nome```, ```id``` e ```id_sistema```, sendo que esses atributos não são necessários para o Machine Learning.* Como o objetivo é classificar um objeto, há duas condições que devem ser seguidas para o ML:
+*Os dados utilizados para treino e classificação são os dados físicos de ```tb_corpo_celeste```, com exceção das colunas ```nome```, ```id``` e ```id_sistema```, sendo que esses atributos não são necessários para o Machine Learning.* Como o objetivo é classificar um objeto, há duas condições que devem ser seguidas para o ML:
 - A coluna que se deseja prever ou classificar deve ser composta de números inteiros (o que, com a normalização dos dados do banco, isso já se cumpre);
 - As classificações devem todas ter os mesmos atributos (o que já se cumpre dentro da tabela ```tb_corpo_celeste```).
 
@@ -141,4 +141,99 @@ Matriz de Confusão:
  [0 0 0 2 1]
  [0 0 0 0 1]] 
 ```
-A matriz de confusão mostra o quanto os dados de teste foram classificados corretamente. Se considerarmos a primeira linha, podemos ver que 3 instâncias forma classificadas corretamente como planetas e nenhuma instância foi classificada errada. Resumindo o seu funcionamento, podemos concluir que houve maior confusão do modelo com a classificação de satélites, havendo uma instância classificada errada como asteroide. 
+A matriz de confusão mostra o quanto os dados de teste foram classificados corretamente. Se considerarmos a primeira linha, podemos ver que 3 instâncias forma classificadas corretamente como planetas e nenhuma instância foi classificada errada. Resumindo o seu funcionamento, podemos concluir que houve maior confusão do modelo com a classificação de satélites, havendo uma instância classificada errada como asteroide.
+
+##Classificando exoplanetas e estrelas
+Foram escolhidos quatro exoplanetas e duas estrelas para classificação. A criação de um novo dataframe com dados dos exoplanetas e estrelas permite o processo:
+```
+nomes_exo = ["NGTS-9 b", "HD 86226 c", "TOI-2373 b", "TOI-2524 b", "NGTS-9", "TOI-2524"]
+mass_exo = [5.505939999999999e+27, 4.3307066e+25, 1.7656980000000002e+28, 1.2151039999999999e+27,
+            1.34*1.9891e30,1.01*1.9891e30]
+raio_exo = [76496.44, 13776.5084, 66487.56, 71492.0,
+            1.38*6.96e5,1.12*6.96e5]
+temp_exo = [1448.0, 1311.0, 860.0, 1100.0,6330.0,5831.0]
+
+dados_exo = {
+    'massa_kg': mass_exo,
+    'raio_medio_km': raio_exo,
+    'temperatura_k': temp_exo
+}
+df_exo = pd.DataFrame(dados_exo)
+
+df_exo['volume_m3'] = 4*math.pi*((df_exo['raio_medio_km']*1000)**3)/3
+df_exo['densidade_kg/m3'] = df_exo['massa_kg']/df_exo['volume_m3']
+df_exo['g'] = G*df_exo['massa_kg']/((df_exo['raio_medio_km']*1000)**2)
+df_exo['r_m2t4'] = ((df_exo['raio_medio_km']*1000)**2)*(df_exo['temperatura_k']**4)
+
+probabilidades = model.predict_proba(df_exo)
+probabilidades = np.matrix(probabilidades)
+probabilidades = pd.DataFrame(probabilidades,index=nomes_exo,columns=classificacao)
+
+print("Probabilidades de cada classificação:\n")
+print(probabilidades,'\n')
+```
+A classificação não foi feita de forma direta, mas sim por meio de probabilidades de cada objeto pertencer a cada uma das cinco classes. A tabela de probabilidade é a seguinte:
+```
+Probabilidades de cada classificação:
+
+            Planeta  Estrela  Planeta Anão  Satélite  Asteroide
+NGTS-9 b        1.0      0.0           0.0       0.0        0.0
+HD 86226 c      1.0      0.0           0.0       0.0        0.0
+TOI-2373 b      1.0      0.0           0.0       0.0        0.0
+TOI-2524 b      1.0      0.0           0.0       0.0        0.0
+NGTS-9          0.0      1.0           0.0       0.0        0.0
+TOI-2524        0.0      1.0           0.0       0.0        0.0 
+```
+Mesmo com 90% de acurácia, o modelo conseguiu acertar com 100% de rendimento as classes dos objetos, ainda seja uma tabela de probabilidades. No entanto, isso não é quer dizer que o modelo sempre irá acertar, por exemplo, é possível o modelo eventualmente confundir um satélite com um asteroide, visto que o ML usou apenas dados físicos e não orbitais.
+
+# Cadastrar dados aprovados pelo modelo
+Se quisermos incrementar o banco com dados aprovados pelo modelo, podemos finalizar o projeto com o seguinte cadastro:
+```
+if acuracia >= 0.9: #opcional, visto que na própria criação do modelo há esse tratamento
+  for x,y in probabilidades.iterrows():
+    if y['Estrela'] >= 0.95:
+      try:
+        cursor.execute('SELECT MAX(id)+1 FROM tb_sistema_solar')
+        id_sistema = cursor.fetchone()[0]
+        cursor.execute('''INSERT INTO tb_sistema_solar VALUES (?, ?, 2)''', (id_sistema, x))
+
+        cursor.execute('SELECT MAX(id)+1 FROM tb_corpo_celeste')
+        id_corpo = cursor.fetchone()[0]
+
+        cursor.execute('SELECT id FROM tb_sistema_solar WHERE nome = ?', (x,))
+        id_sistema = cursor.fetchone()[0]
+
+        cursor.execute('''INSERT INTO tb_corpo_celeste VALUES (?, ?, ?, ?, ?, ?, 2)''',
+                      (id_corpo, x, mass_exo[nomes_exo.index(x)],
+                      raio_exo[nomes_exo.index(x)],
+                      temp_exo[nomes_exo.index(x)],
+                      id_sistema))
+
+        cursor.execute('SELECT MAX(id)+1 FROM tb_estrela')
+        id_estrela = cursor.fetchone()[0]
+
+        cursor.execute('SELECT id FROM tb_corpo_celeste WHERE nome = ?', (x,))
+        id_corpo = cursor.fetchone()[0]
+
+        cursor.execute('''INSERT INTO tb_estrela VALUES (?, ?)''', (id_estrela, id_corpo))
+      except Exception as e:
+        print("Deu erro no cadastro:", str(e))
+      else:
+        conn.commit()
+
+cursor.close()
+conn.close()
+print("Projeto concluído!")
+```
+
+<div align= center>
+
+# Redes sociais e formas de contato
+
+
+
+[![logo](https://cdn-icons-png.flaticon.com/256/174/174857.png)](https://br.linkedin.com/in/giovanyrezende)
+[![logo](https://images.crunchbase.com/image/upload/c_lpad,f_auto,q_auto:eco,dpr_1/v1426048404/y4lxnqcngh5dvoaz06as.png)](https://github.com/GiovanyRezende)[
+![logo](https://logospng.org/download/gmail/logo-gmail-256.png)](mailto:giovanyrmedeiros@gmail.com)
+
+</div>
